@@ -24,6 +24,7 @@ public class GameCtrl {
         if(scanner.nextLine().toLowerCase().equals("y")){
             changeSettings();
         }
+        prepareRound();
     }
 
     static private void prepareRound() {
@@ -31,9 +32,28 @@ public class GameCtrl {
         throw new UnsupportedOperationException();
     }
 
+    private static void endRound(int gainP1, int gainP2){
+        actualRound++;
+        if(actualRound > settings.getNbRounds() || (p1.getPv()==0 || p2.getPv()==0)){
+            endGame();
+            return;
+        }
+        //Prochain round
+        //Addition gain tour aux 2 joueurs
+        p1.setBudget(p1.getBudget()+settings.getMinLoot()+gainP1);
+        p2.setBudget(p2.getBudget()+settings.getMinLoot()+gainP2);
+        prepareRound();
+    }
+
     static private void endGame() {
-        // TODO - implement GameCtrl.endGame
-        throw new UnsupportedOperationException();
+        if(p1.getPv()==0){
+            System.out.println("Victoire du joueur 2 !");
+        }else if(p2.getPv()==0){
+            System.out.println("Victoire du joueur 1 !");
+        }else{
+            int vainqueur = p1.getPv() > p2.getPv() ? 1 : 2;
+            System.out.println("Plus de round ! Victoire du joueur "+vainqueur+" !");
+        }
     }
 
 	private static void displaySettings() {
@@ -51,7 +71,7 @@ public class GameCtrl {
         String inputString;
         try{
             do {
-                int newVal = 0;
+                int newVal;
                 System.out.println("Choissisez un des paramètres (1 à 5 / terminer avec q) :");
                 inputString = scanner.nextLine();
                 switch (inputString) {
