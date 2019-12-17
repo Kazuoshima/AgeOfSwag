@@ -1,3 +1,4 @@
+import java.util.Random;
 import java.util.Scanner;
 
 public class GameCtrl {
@@ -6,6 +7,7 @@ public class GameCtrl {
     static private Player p2;
     static private int actualRound;
     private static Scanner scanner = new Scanner(System.in);
+    private static Random random = new Random();
 
     public static void main(String[] args) {
         System.out.println("Yoyoyo bienvenue sur Age Of Swag");
@@ -13,18 +15,96 @@ public class GameCtrl {
     }
 
     static private void fight() {
-        // TODO - implement GameCtrl.fight
-        throw new UnsupportedOperationException();
+        int p1Loot = settings.getMinLoot();
+        int p2Loot = settings.getMinLoot();
+        while (!p1.team.isEmpty() && !p2.team.isEmpty()) {
+            Unity p1Unity = p1.team.get(0);
+            Unity p2Unity = p2.team.get(0);
+
+            boolean p1UnityToBegin = (p1Unity.getSpeed() == p2Unity.getSpeed()) ? random.nextBoolean() : (p1Unity.getSpeed() > p2Unity.getSpeed());
+
+            while (p1Unity.getPv() > 0 && p2Unity.getPv() > 0) {
+                if (p1UnityToBegin) {
+                    System.out.println(p1Unity.getName() + " (P1) inflige " + p1Unity.getPa() + " points de dégâts à " + p2Unity.getName() + " (J2) !");
+                    p2Unity.setPv(p2Unity.getPv() - p1Unity.getPa());
+                    if (p2Unity.getPv() <= 0) {
+                        System.out.println(p2Unity.getName() + " a clamse et donne " + p2Unity.getLoot() + "$ au J1");
+                        p1Loot += p2Unity.getLoot();
+                        p2.removeUnity(p2Unity);
+                        break;
+                    }
+                    System.out.println(p2Unity.getName() + " (P2) inflige " + p2Unity.getPa() + " points de dégâts à " + p1Unity.getName() + " (J1) !");
+                    p1Unity.setPv(p1Unity.getPv() - p2Unity.getPa());
+                    if (p1Unity.getPv() <= 0) {
+                        System.out.println(p1Unity.getName() + " a clamse et donne " + p1Unity.getLoot() + "$ au J2");
+                        p2Loot += p1Unity.getLoot();
+                        p1.removeUnity(p1Unity);
+                        break;
+                    }
+                } else {
+                    System.out.println(p2Unity.getName() + " (P2) inflige " + p2Unity.getPa() + " points de dégâts à " + p1Unity.getName() + " (J1) !");
+                    p1Unity.setPv(p1Unity.getPv() - p2Unity.getPa());
+                    if (p1Unity.getPv() <= 0) {
+                        System.out.println(p1Unity.getName() + " a clamse et donne " + p1Unity.getLoot() + "$ au J2");
+                        p2Loot += p1Unity.getLoot();
+                        p1.removeUnity(p1Unity);
+                        break;
+                    }
+                    System.out.println(p1Unity.getName() + " (P1) inflige " + p1Unity.getPa() + " points de dégâts à " + p2Unity.getName() + " (J2) !");
+                    p2Unity.setPv(p2Unity.getPv() - p1Unity.getPa());
+                    if (p2Unity.getPv() <= 0) {
+                        System.out.println(p2Unity.getName() + " a clamse et donne " + p2Unity.getLoot() + "$ au J1");
+                        p1Loot += p2Unity.getLoot();
+                        p2.removeUnity(p2Unity);
+                        break;
+                    }
+                }
+            }
+        }
+        // one team has 0 unities
+        int damage = 0;
+        boolean p1Won = false;
+        while (!p1.team.isEmpty()) {
+            p1Won = true;
+            Unity u = p1.team.get(0);
+            damage += u.getPv() + u.getPa();
+            p1.team.remove(u);
+        }
+
+        while (!p2.team.isEmpty()) {
+            p1Won = false;
+            Unity u = p2.team.get(0);
+            damage += u.getPv() + u.getPa();
+            p2.team.remove(u);
+        }
+
+        if (damage == 0) System.out.println("Aucun joueur n'a subit de dégât lors de ce tour");
+        else {
+            if (p1Won) {
+                System.out.println("Les unités restantes de J1 ont infligé " + damage + " points de dégât à J2 !");
+                p2.setPv(p2.getPv() - damage);
+            } else {
+                System.out.println("Les unités restantes de J2 ont infligé " + damage + " points de dégât à J1 !");
+                p1.setPv(p1.getPv() - damage);
+            }
+        }
+
+        endRound(p1Loot, p2Loot);
     }
 
     static private void startGame() {
         System.out.println("Voici les paramètres actuels de la partie :");
         displaySettings();
         System.out.println("Voulez vous modifier ces paramètres ? [y/N]");
-        if(scanner.nextLine().toLowerCase().equals("y")){
-            changeSettings();
+        String answer = scanner.nextLine();
+        if (answer.equals("y") || answer.equals("Y")) changeSettings();
+
+        // game begins
+        for (actualRound = 0; actualRound < settings.getNbRounds(); actualRound++) {
+            System.out.println("+----- Round " + (actualRound + 1) + " -----+");
+            prepareRound();
+            fight();
         }
-        prepareRound();
     }
 
     static private void prepareRound() {
@@ -130,7 +210,7 @@ public class GameCtrl {
                         }
                         displaySettings();
                         break;
-                    case "d":
+                    case "q":
                         break;
                     default:
                         System.out.println("Input non reconnu.");
