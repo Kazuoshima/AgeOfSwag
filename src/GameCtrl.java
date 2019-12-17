@@ -32,6 +32,46 @@ public class GameCtrl {
         throw new UnsupportedOperationException();
     }
 
+    private static void buyBonus(Unity unit){
+        System.out.println(Bonus.bonusInfos());
+        System.out.println("Selectionnez un bonus ou tapez 'q' pour quitter.");
+        boolean loop = true;
+        Bonus bonus;
+        while (loop){
+            switch (scanner.nextLine().toLowerCase()){
+                case "vie" :
+                    loop = false;
+                    bonus = Bonus.LifeBonus();
+                    addBonusOnUnity(unit,bonus);
+                    System.out.println("Bonus de vie appliqué !");
+                    break;
+                case "force" :
+                    loop = false;
+                    bonus = Bonus.StrengthBonus();
+                    addBonusOnUnity(unit,bonus);
+                    System.out.println("Bonus de force appliqué !");
+                    break;
+                case "speed" :
+                    loop = false;
+                    bonus = Bonus.SpeedBonus();
+                    addBonusOnUnity(unit,bonus);
+                    System.out.println("Bonus de vitesse appliqué !");
+                    break;
+                case "q" :
+                    loop = false;
+                    break;
+                default:
+                    loop = true;
+                    break;
+            }
+        }
+    }
+    private static void addBonusOnUnity(Unity unit,Bonus bonus){
+        unit.setPv((int)(unit.getPv()*bonus.getPvFactor()));
+        unit.setPa((int)(unit.getPa()*bonus.getPaFactor()));
+        unit.setSpeed((int)(unit.getSpeed()*bonus.getSpeedFactor()));
+    }
+
     private static void endRound(int gainP1, int gainP2){
         actualRound++;
         if(actualRound > settings.getNbRounds() || (p1.getPv()==0 || p2.getPv()==0)){
@@ -130,7 +170,7 @@ public class GameCtrl {
                         }
                         displaySettings();
                         break;
-                    case "d":
+                    case "q":
                         break;
                     default:
                         System.out.println("Input non reconnu.");
