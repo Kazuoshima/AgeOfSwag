@@ -1,8 +1,6 @@
 public class TheRock extends Unity {
 
 	public TheRock() {
-		// TODO - implement TheRock.TheRock
-		throw new UnsupportedOperationException();
+		super("The Rock",6,4,5,3,3);
 	}
-
 }

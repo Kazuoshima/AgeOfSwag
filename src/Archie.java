@@ -1,8 +1,7 @@
 public class Archie extends Unity {
 
 	public Archie() {
-		// TODO - implement Archie.Archie
-		throw new UnsupportedOperationException();
+		super("Archie",8,6,10,6,2);
 	}
 
 }
