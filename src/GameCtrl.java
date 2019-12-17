@@ -110,7 +110,6 @@ public class GameCtrl {
     static private void prepareRound() {
         p1 = new Player(100, 30);
         acheterUnite(p1);
-
     }
 
     static private void acheterUnite(Player p){
