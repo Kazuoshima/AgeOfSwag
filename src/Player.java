@@ -1,27 +1,35 @@
-import java.util.*;
+import java.util.ArrayList;
 
 public class Player {
 
-	Collection<Unity> team;
+	ArrayList<Unity> team;
 	private int pv;
 	private int budget;
+
+	public Player(int pv, int budget){
+		this.pv = pv;
+		this.budget = budget;
+		team = new ArrayList<>();
+	}
 
 	/**
 	 * 
 	 * @param unity
 	 */
-	public Unity[] addUnity(Unity unity) {
-		// TODO - implement Player.addUnity
-		throw new UnsupportedOperationException();
+	public ArrayList<Unity> addUnity(Unity unity) {
+		team.add(unity);
+		return team;
 	}
 
 	/**
 	 * 
-	 * @param index
+	 * @param unity
 	 */
-	public Unity[] removeUnity(int index) {
-		// TODO - implement Player.removeUnity
-		throw new UnsupportedOperationException();
+	public ArrayList<Unity> removeUnity(Unity unity) {
+		if (!team.isEmpty()){
+			team.remove(unity);
+		}
+		return team;
 	}
 
 }

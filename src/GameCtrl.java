@@ -1,5 +1,12 @@
 public class GameCtrl {
-    public static void main(String[] args) {
+
+	Player p1;
+	Settings settings;
+	Player p2;
+	private int actualRound;
+
+
+	public static void main(String[] args) {
         System.out.println("SWAG");
     }
 
@@ -33,8 +40,4 @@ public class GameCtrl {
 		throw new UnsupportedOperationException();
 	}
 
-	Player p1;
-	Settings settings;
-	Player p2;
-	private int actualRound;
 }
