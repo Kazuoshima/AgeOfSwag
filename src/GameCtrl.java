@@ -10,8 +10,30 @@ public class GameCtrl {
     private static Random random = new Random();
 
     public static void main(String[] args) {
-        System.out.println("Yoyoyo bienvenue sur Age Of Swag");
+        outline("Yoyoyo bienvenue sur Age Of Swag");
         startGame();
+    }
+
+    private static void printOutlined(String s, int totalWidth) {
+        for (int i = 0; i < (totalWidth - (s.length() + 4)) / 2; i++) System.out.print(" ");
+        System.out.println("| " + s + " |");
+    }
+
+    private static void printBorder(int maxLength, int width) {
+        StringBuilder o = new StringBuilder(width);
+        for (int i = 0; i < (maxLength - (width + 4)) / 2; i++) o.append(" ");
+        o.append("+");
+        for (int i = 0; i < width + 2; i++) o.append('-');
+        o.append('+');
+        System.out.println(o);
+    }
+
+    private static void outline(String s) {
+        int maxLength = 80;
+        int length = s.length();
+        printBorder(maxLength, length);
+        printOutlined(s, maxLength);
+        printBorder(maxLength, length);
     }
 
     static private void fight() {
@@ -93,12 +115,15 @@ public class GameCtrl {
     }
 
     static private void startGame() {
-        System.out.println("Voici les paramètres actuels de la partie :");
+//        System.out.println("Voici les paramètres actuels de la partie :");
+        outline("Voici les paramètres actuels de la partie :");
         displaySettings();
         System.out.println("Voulez vous modifier ces paramètres ? [y/N]");
         String answer = scanner.nextLine();
         if (answer.equals("y") || answer.equals("Y")) changeSettings();
 
+        p1 = new Player(settings.getPlayerPv(), settings.getPlayerBudget());
+        p2 = new Player(settings.getPlayerPv(), settings.getPlayerBudget());
         // game begins
         for (actualRound = 0; actualRound < settings.getNbRounds(); actualRound++) {
             System.out.println("+----- Round " + (actualRound + 1) + " -----+");
@@ -108,49 +133,57 @@ public class GameCtrl {
     }
 
     static private void prepareRound() {
-        p1 = new Player(100, 30);
         acheterUnite(p1);
+        acheterUnite(p2);
     }
 
-    static private void acheterUnite(Player p){
-        TheRock.infos(); Archie.infos(); Dino.infos();
-        while(p.team.size() < settings.getMaxUnities()){
+    static private void acheterUnite(Player p) {
+        TheRock.infos();
+        Archie.infos();
+        Dino.infos();
+        while (p.team.size() < settings.getMaxUnities()) {
             System.out.println("Votre bugdet : " + p.getBudget() + " Vos PV : " + p.getPv());
             System.out.println("Quel type d'unité souhaitez-vous acheter ? (Tapez Q pour finir les achats) (Tapez V pour vendre des unités)");
             String unite = scanner.nextLine();
-            if(unite.equals("TheRock") || unite.equals("Archie") || unite.equals("Dino")){
+            if (unite.equals("TheRock") || unite.equals("Archie") || unite.equals("Dino")) {
                 Unity unit;
-                switch (unite){
-                    case "TheRock": unit = new TheRock(); break;
-                    case "Archie": unit = new Archie(); break;
-                    default: unit = new Dino(); break;
+                switch (unite) {
+                    case "TheRock":
+                        unit = new TheRock();
+                        break;
+                    case "Archie":
+                        unit = new Archie();
+                        break;
+                    default:
+                        unit = new Dino();
+                        break;
                 }
                 System.out.println("Souhaitez-vous payer avec des $ ou des PV's ? ($ ou PV)");
                 String payement = scanner.nextLine();
-                if(payement.equals("$")){
-                    if(p.getBudget() >= unit.getCost()){
+                if (payement.equals("$")) {
+                    if (p.getBudget() >= unit.getCost()) {
                         p.setBudget(p.getBudget() - unit.getCost());
                         p.addUnity(unit);
-                    }else{
+                    } else {
                         System.out.println("Votre budget est insuffisant pour cette achat !");
                     }
-                }else if(payement.equals("PV")){
-                    if(p.getPv() >= unit.getCost()){
+                } else if (payement.equals("PV")) {
+                    if (p.getPv() >= unit.getCost()) {
                         p.setPv(p.getPv() - unit.getCost());
                         p.addUnity(unit);
-                    }else{
+                    } else {
                         System.out.println("Vos PV sont insuffisant pour cette achat !");
                     }
-                }else{
+                } else {
                     System.out.println("Erreur lors de l'écriture du moyen de payement !");
                 }
-            }else if (unite.equals("Q")){
+            } else if (unite.equals("Q")) {
                 System.out.println("Fin des achats !");
                 printTeam(p);
                 return;
-            }else if (unite.equals("V")){
+            } else if (unite.equals("V")) {
                 vendreUnite(p);
-            }else{
+            } else {
                 System.out.println("Erreur lors de l'écriture du nom de l'unité !");
             }
         }
@@ -158,58 +191,58 @@ public class GameCtrl {
         printTeam(p);
     }
 
-    private static void vendreUnite(Player p){
+    private static void vendreUnite(Player p) {
         printTeam(p);
         System.out.println("Quel unité souhaitez-vous vendre, indiquez le numéro de celle ci ? (Tapez Q pour quitter)");
         String index = scanner.nextLine();
-        if(index.equals("Q")){
+        if (index.equals("Q")) {
             return;
-        }else{
-            try{
+        } else {
+            try {
                 int i = Integer.parseInt(index);
                 Unity unit = p.team.get(i - 1);
                 p.setBudget(p.getBudget() + unit.getCost());
                 p.removeUnity(unit);
-            }catch (NumberFormatException ex){
+            } catch (NumberFormatException ex) {
                 System.out.println("Erreur lors de la sélection de l'unité à vendre !");
             }
         }
     }
 
-    private static void printTeam(Player p){
+    private static void printTeam(Player p) {
         int index = 1;
-        for (Unity unit : p.team){
+        for (Unity unit : p.team) {
             System.out.println(index + " : " + unit.toString());
             index++;
         }
     }
 
-    private static void buyBonus(Unity unit){
+    private static void buyBonus(Unity unit) {
         System.out.println(Bonus.bonusInfos());
         System.out.println("Selectionnez un bonus ou tapez 'q' pour quitter.");
         boolean loop = true;
         Bonus bonus;
-        while (loop){
-            switch (scanner.nextLine().toLowerCase()){
-                case "vie" :
+        while (loop) {
+            switch (scanner.nextLine().toLowerCase()) {
+                case "vie":
                     loop = false;
                     bonus = Bonus.LifeBonus();
-                    addBonusOnUnity(unit,bonus);
+                    addBonusOnUnity(unit, bonus);
                     System.out.println("Bonus de vie appliqué !");
                     break;
-                case "force" :
+                case "force":
                     loop = false;
                     bonus = Bonus.StrengthBonus();
-                    addBonusOnUnity(unit,bonus);
+                    addBonusOnUnity(unit, bonus);
                     System.out.println("Bonus de force appliqué !");
                     break;
-                case "speed" :
+                case "speed":
                     loop = false;
                     bonus = Bonus.SpeedBonus();
-                    addBonusOnUnity(unit,bonus);
+                    addBonusOnUnity(unit, bonus);
                     System.out.println("Bonus de vitesse appliqué !");
                     break;
-                case "q" :
+                case "q":
                     loop = false;
                     break;
                 default:
@@ -218,38 +251,39 @@ public class GameCtrl {
             }
         }
     }
-    private static void addBonusOnUnity(Unity unit,Bonus bonus){
-        unit.setPv((int)(unit.getPv()*bonus.getPvFactor()));
-        unit.setPa((int)(unit.getPa()*bonus.getPaFactor()));
-        unit.setSpeed((int)(unit.getSpeed()*bonus.getSpeedFactor()));
+
+    private static void addBonusOnUnity(Unity unit, Bonus bonus) {
+        unit.setPv((int) (unit.getPv() * bonus.getPvFactor()));
+        unit.setPa((int) (unit.getPa() * bonus.getPaFactor()));
+        unit.setSpeed((int) (unit.getSpeed() * bonus.getSpeedFactor()));
     }
 
-    private static void endRound(int gainP1, int gainP2){
+    private static void endRound(int gainP1, int gainP2) {
         actualRound++;
-        if(actualRound > settings.getNbRounds() || (p1.getPv()==0 || p2.getPv()==0)){
+        if (actualRound > settings.getNbRounds() || (p1.getPv() == 0 || p2.getPv() == 0)) {
             endGame();
             return;
         }
         //Prochain round
         //Addition gain tour aux 2 joueurs
-        p1.setBudget(p1.getBudget()+settings.getMinLoot()+gainP1);
-        p2.setBudget(p2.getBudget()+settings.getMinLoot()+gainP2);
+        p1.setBudget(p1.getBudget() + settings.getMinLoot() + gainP1);
+        p2.setBudget(p2.getBudget() + settings.getMinLoot() + gainP2);
         prepareRound();
     }
 
     static private void endGame() {
-        if(p1.getPv()==0){
+        if (p1.getPv() == 0) {
             System.out.println("Victoire du joueur 2 !");
-        }else if(p2.getPv()==0){
+        } else if (p2.getPv() == 0) {
             System.out.println("Victoire du joueur 1 !");
-        }else{
+        } else {
             int vainqueur = p1.getPv() > p2.getPv() ? 1 : 2;
-            System.out.println("Plus de round ! Victoire du joueur "+vainqueur+" !");
+            System.out.println("Plus de round ! Victoire du joueur " + vainqueur + " !");
         }
     }
 
-	private static void displaySettings() {
-		//Display list of all settings current values
+    private static void displaySettings() {
+        //Display list of all settings current values
 
 		System.out.println("1. Point de vie initiaux des joueurs : " + settings.getPlayerPv());
 		System.out.println("2. Budget initial des joueurs : " + settings.getPlayerBudget());
@@ -257,11 +291,22 @@ public class GameCtrl {
 		System.out.println("4. Nombre d'unités maximal dans une équipe : " + settings.getMaxUnities());
 		System.out.println("5. Nombre de tours possibles (au maximum) : " + settings.getNbRounds());
 
-	}
+        /*String s[] = new String[5];
+        int length = 0;
+        s[0] = ("1. Point de vie initiaux des joueurs : " + settings.getPlayerPv());
+        s[1] = ("2. Budget initial des joueurs : " + settings.getPlayerBudget());
+        s[2] = ("3. Gain au début de chaque tour : " + settings.getMinLoot());
+        s[3] = ("4. Nombre d'unités maximal dans une équipe : " + settings.getMaxUnities());
+        s[4] = ("5. Nombre de tours possibles (au maximum) : " + settings.getNbRounds());
+        for (String value : s) if (value.length() > length) length = value.length();
+        printBorder(80, length);
+        for (String value : s) printOutlined(value, length);
+        printBorder(80, length);*/
+    }
 
-	private static void changeSettings() {
+    private static void changeSettings() {
         String inputString;
-        try{
+        try {
             do {
                 int newVal;
                 System.out.println("Choissisez un des paramètres (1 à 5 / terminer avec q) :");
@@ -330,11 +375,11 @@ public class GameCtrl {
                         break;
                 }
             } while (!inputString.equals("q"));
-        }catch(NumberFormatException e){
+        } catch (NumberFormatException e) {
             System.out.println("Erreur lors de l'entrée des données pour les paramètres.");
             System.out.println("Le jeu va continuer avec les paramètre actuels : ");
             displaySettings();
         }
-	}
+    }
 
 }
