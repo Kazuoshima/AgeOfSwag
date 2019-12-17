@@ -63,4 +63,9 @@ public class Unity {
 	public void setSpeed(int speed) {
 		this.speed = speed;
 	}
+
+	@Override
+	public String toString() {
+		return this.getName() + " {PV : " + this.getPv() + ",  PA : " + this.getPa() + ", COÛT : " + this.getCost() + ",  BUTIN : " + this.getLoot() + ",  VITESSE : " + this.getSpeed() + "}";
+	}
 }

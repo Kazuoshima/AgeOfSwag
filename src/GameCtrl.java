@@ -1,3 +1,5 @@
+import javafx.scene.shape.Arc;
+
 import java.util.Scanner;
 
 public class GameCtrl {
@@ -9,7 +11,7 @@ public class GameCtrl {
 
     public static void main(String[] args) {
         System.out.println("Yoyoyo bienvenue sur Age Of Swag");
-        startGame();
+        prepareRound();
     }
 
     static private void fight() {
@@ -27,8 +29,81 @@ public class GameCtrl {
     }
 
     static private void prepareRound() {
-        // TODO - implement GameCtrl.prepareRound
-        throw new UnsupportedOperationException();
+        p1 = new Player(100, 30);
+        acheterUnite(p1);
+        
+    }
+
+    static private void acheterUnite(Player p){
+        TheRock.infos(); Archie.infos(); Dino.infos();
+        while(p.team.size() < settings.getMaxUnities()){
+            System.out.println("Votre bugdet : " + p.getBudget() + " Vos PV : " + p.getPv());
+            System.out.println("Quel type d'unité souhaitez-vous acheter ? (Tapez Q pour finir les achats) (Tapez V pour vendre des unités)");
+            String unite = scanner.nextLine();
+            if(unite.equals("TheRock") || unite.equals("Archie") || unite.equals("Dino")){
+                Unity unit;
+                switch (unite){
+                    case "TheRock": unit = new TheRock(); break;
+                    case "Archie": unit = new Archie(); break;
+                    default: unit = new Dino(); break;
+                }
+                System.out.println("Souhaitez-vous payer avec des $ ou des PV's ? ($ ou PV)");
+                String payement = scanner.nextLine();
+                if(payement.equals("$")){
+                    if(p.getBudget() >= unit.getCost()){
+                        p.setBudget(p.getBudget() - unit.getCost());
+                        p.addUnity(unit);
+                    }else{
+                        System.out.println("Votre budget est insuffisant pour cette achat !");
+                    }
+                }else if(payement.equals("PV")){
+                    if(p.getPv() >= unit.getCost()){
+                        p.setPv(p.getPv() - unit.getCost());
+                        p.addUnity(unit);
+                    }else{
+                        System.out.println("Vos PV sont insuffisant pour cette achat !");
+                    }
+                }else{
+                    System.out.println("Erreur lors de l'écriture du moyen de payement !");
+                }
+            }else if (unite.equals("Q")){
+                System.out.println("Fin des achats !");
+                printTeam(p);
+                return;
+            }else if (unite.equals("V")){
+                vendreUnite(p);
+            }else{
+                System.out.println("Erreur lors de l'écriture du nom de l'unité !");
+            }
+        }
+        System.out.println("Vous avez atteint le nombre maximum d'unité dans votre équipe ! (" + settings.getMaxUnities() + ")");
+        printTeam(p);
+    }
+
+    private static void vendreUnite(Player p){
+        printTeam(p);
+        System.out.println("Quel unité souhaitez-vous vendre, indiquez le numéro de celle ci ? (Tapez Q pour quitter)");
+        String index = scanner.nextLine();
+        if(index.equals("Q")){
+            return;
+        }else{
+            try{
+                int i = Integer.parseInt(index);
+                Unity unit = p.team.get(i - 1);
+                p.setBudget(p.getBudget() + unit.getCost());
+                p.removeUnity(unit);
+            }catch (NumberFormatException ex){
+                System.out.println("Erreur lors de la sélection de l'unité à vendre !");
+            }
+        }
+    }
+
+    private static void printTeam(Player p){
+        int index = 1;
+        for (Unity unit : p.team){
+            System.out.println(index + " : " + unit.toString());
+            index++;
+        }
     }
 
     static private void endGame() {
