@@ -14,9 +14,15 @@ public class GameCtrl {
         startGame();
     }
 
-    private static void printOutlined(String s, int totalWidth) {
-        for (int i = 0; i < (totalWidth - (s.length() + 4)) / 2; i++) System.out.print(" ");
-        System.out.println("| " + s + " |");
+    private static void printOutlined(String s, int totalWidth, int frameWidth) {
+        for (int i = 0; i < (totalWidth - (frameWidth + 4)) / 2; i++) System.out.print(" ");
+        StringBuilder sB = new StringBuilder();
+        sB.append("| ");
+        for (int i = 0; i < (frameWidth - s.length()) / 2; i++) sB.append(" ");
+        sB.append(s);
+        for (int i = 0; i < (frameWidth - s.length()) / 2; i++) sB.append(" ");
+        sB.append(" |");
+        System.out.println(sB);
     }
 
     private static void printBorder(int maxLength, int width) {
@@ -32,7 +38,7 @@ public class GameCtrl {
         int maxLength = 80;
         int length = s.length();
         printBorder(maxLength, length);
-        printOutlined(s, maxLength);
+        printOutlined(s, maxLength, s.length());
         printBorder(maxLength, length);
     }
 
@@ -125,24 +131,22 @@ public class GameCtrl {
         p1 = new Player(settings.getPlayerPv(), settings.getPlayerBudget());
         p2 = new Player(settings.getPlayerPv(), settings.getPlayerBudget());
         // game begins
-        for (actualRound = 0; actualRound < settings.getNbRounds(); actualRound++) {
-            System.out.println("+----- Round " + (actualRound + 1) + " -----+");
-            prepareRound();
-            fight();
-        }
+        outline("Round " + (actualRound + 1));
+        prepareRound();
     }
 
     static private void prepareRound() {
         acheterUnite(p1);
         acheterUnite(p2);
+        fight();
     }
 
     static private void acheterUnite(Player p) {
-        TheRock.infos();
-        Archie.infos();
-        Dino.infos();
         while (p.team.size() < settings.getMaxUnities()) {
-            System.out.println("Votre bugdet : " + p.getBudget() + " Vos PV : " + p.getPv());
+            outline("Budget J" + (p == p1 ? 1 : 2) + " : " + p.getBudget() + "$ - " + p.getPv() + " PV");
+            TheRock.infos();
+            Archie.infos();
+            Dino.infos();
             System.out.println("Quel type d'unité souhaitez-vous acheter ? (Tapez Q pour finir les achats) (Tapez V pour vendre des unités)");
             String unite = scanner.nextLine();
             if (unite.equals("TheRock") || unite.equals("Archie") || unite.equals("Dino")) {
@@ -163,16 +167,18 @@ public class GameCtrl {
                 if (payement.equals("$")) {
                     if (p.getBudget() >= unit.getCost()) {
                         p.setBudget(p.getBudget() - unit.getCost());
+                        buyBonus(unit, p);
                         p.addUnity(unit);
                     } else {
-                        System.out.println("Votre budget est insuffisant pour cette achat !");
+                        System.out.println("Votre budget est insuffisant pour cet achat !");
                     }
                 } else if (payement.equals("PV")) {
                     if (p.getPv() >= unit.getCost()) {
                         p.setPv(p.getPv() - unit.getCost());
+                        buyBonus(unit, p);
                         p.addUnity(unit);
                     } else {
-                        System.out.println("Vos PV sont insuffisant pour cette achat !");
+                        System.out.println("Vos PV sont insuffisant pour cet achat !");
                     }
                 } else {
                     System.out.println("Erreur lors de l'écriture du moyen de payement !");
@@ -180,6 +186,7 @@ public class GameCtrl {
             } else if (unite.equals("Q")) {
                 System.out.println("Fin des achats !");
                 printTeam(p);
+                printBorder(80, 80);
                 return;
             } else if (unite.equals("V")) {
                 vendreUnite(p);
@@ -189,15 +196,14 @@ public class GameCtrl {
         }
         System.out.println("Vous avez atteint le nombre maximum d'unité dans votre équipe ! (" + settings.getMaxUnities() + ")");
         printTeam(p);
+        printBorder(80, 80);
     }
 
     private static void vendreUnite(Player p) {
         printTeam(p);
         System.out.println("Quel unité souhaitez-vous vendre, indiquez le numéro de celle ci ? (Tapez Q pour quitter)");
         String index = scanner.nextLine();
-        if (index.equals("Q")) {
-            return;
-        } else {
+        if (!index.equals("Q")) {
             try {
                 int i = Integer.parseInt(index);
                 Unity unit = p.team.get(i - 1);
@@ -217,30 +223,27 @@ public class GameCtrl {
         }
     }
 
-    private static void buyBonus(Unity unit) {
+    private static void buyBonus(Unity unit, Player player) {
         System.out.println(Bonus.bonusInfos());
         System.out.println("Selectionnez un bonus ou tapez 'q' pour quitter.");
         boolean loop = true;
-        Bonus bonus;
+        Bonus bonus = null;
         while (loop) {
             switch (scanner.nextLine().toLowerCase()) {
                 case "vie":
                     loop = false;
                     bonus = Bonus.LifeBonus();
-                    addBonusOnUnity(unit, bonus);
-                    System.out.println("Bonus de vie appliqué !");
+                    System.out.println("Bonus de vie demandé...");
                     break;
                 case "force":
                     loop = false;
                     bonus = Bonus.StrengthBonus();
-                    addBonusOnUnity(unit, bonus);
-                    System.out.println("Bonus de force appliqué !");
+                    System.out.println("Bonus de force demandé...");
                     break;
                 case "speed":
                     loop = false;
                     bonus = Bonus.SpeedBonus();
-                    addBonusOnUnity(unit, bonus);
-                    System.out.println("Bonus de vitesse appliqué !");
+                    System.out.println("Bonus de vitesse demandé...");
                     break;
                 case "q":
                     loop = false;
@@ -250,6 +253,15 @@ public class GameCtrl {
                     break;
             }
         }
+        if (bonus != null) {
+            if (player.getBudget() < bonus.getCost()) {
+                System.out.println("Budget insuffisant pour acheter ce bonus");
+                return;
+            }
+            player.setBudget(player.getBudget() - bonus.getCost());
+            addBonusOnUnity(unit, bonus);
+            System.out.println("Bonus appliqué !");
+        }
     }
 
     private static void addBonusOnUnity(Unity unit, Bonus bonus) {
@@ -258,24 +270,36 @@ public class GameCtrl {
         unit.setSpeed((int) (unit.getSpeed() * bonus.getSpeedFactor()));
     }
 
-    private static void endRound(int gainP1, int gainP2) {
+    private static void endRound(int totalLootP1, int totalLootP2) {
         actualRound++;
-        if (actualRound > settings.getNbRounds() || (p1.getPv() == 0 || p2.getPv() == 0)) {
+        if (actualRound > settings.getNbRounds() || (p1.getPv() <= 0 || p2.getPv() <= 0)) {
             endGame();
             return;
         }
         //Prochain round
         //Addition gain tour aux 2 joueurs
-        p1.setBudget(p1.getBudget() + settings.getMinLoot() + gainP1);
-        p2.setBudget(p2.getBudget() + settings.getMinLoot() + gainP2);
+        p1.setBudget(p1.getBudget() + totalLootP1);
+        p2.setBudget(p2.getBudget() + totalLootP2);
+
+        outline("Score actuel");
+        String s1 = "J1 : PV = " + p1.getPv() + " - $ = " + p1.getBudget() + "( +" + totalLootP1 + ")";
+        String s2 = "J2 : PV = " + p2.getPv() + " - $ = " + p2.getBudget() + "( +" + totalLootP2 + ")";
+        int w = Math.max(s1.length(), s2.length());
+        printBorder(80, w);
+        printOutlined(s1, 80, w);
+        printOutlined(s2, 80, w);
+        printBorder(80, w);
+
         prepareRound();
     }
 
     static private void endGame() {
-        if (p1.getPv() == 0) {
+        if (p1.getPv() <= 0) {
             System.out.println("Victoire du joueur 2 !");
-        } else if (p2.getPv() == 0) {
+        } else if (p2.getPv() <= 0) {
             System.out.println("Victoire du joueur 1 !");
+        } else if (p1.getPv() == p2.getPv()) {
+            System.out.println("Egalité !");
         } else {
             int vainqueur = p1.getPv() > p2.getPv() ? 1 : 2;
             System.out.println("Plus de round ! Victoire du joueur " + vainqueur + " !");
@@ -285,13 +309,13 @@ public class GameCtrl {
     private static void displaySettings() {
         //Display list of all settings current values
 
-		System.out.println("1. Point de vie initiaux des joueurs : " + settings.getPlayerPv());
-		System.out.println("2. Budget initial des joueurs : " + settings.getPlayerBudget());
-		System.out.println("3. Gain au début de chaque tour : " + settings.getMinLoot());
-		System.out.println("4. Nombre d'unités maximal dans une équipe : " + settings.getMaxUnities());
-		System.out.println("5. Nombre de tours possibles (au maximum) : " + settings.getNbRounds());
+        /*System.out.println("1. Point de vie initiaux des joueurs : " + settings.getPlayerPv());
+        System.out.println("2. Budget initial des joueurs : " + settings.getPlayerBudget());
+        System.out.println("3. Gain au début de chaque tour : " + settings.getMinLoot());
+        System.out.println("4. Nombre d'unités maximal dans une équipe : " + settings.getMaxUnities());
+        System.out.println("5. Nombre de tours possibles (au maximum) : " + settings.getNbRounds());*/
 
-        /*String s[] = new String[5];
+        String s[] = new String[5];
         int length = 0;
         s[0] = ("1. Point de vie initiaux des joueurs : " + settings.getPlayerPv());
         s[1] = ("2. Budget initial des joueurs : " + settings.getPlayerBudget());
@@ -300,8 +324,8 @@ public class GameCtrl {
         s[4] = ("5. Nombre de tours possibles (au maximum) : " + settings.getNbRounds());
         for (String value : s) if (value.length() > length) length = value.length();
         printBorder(80, length);
-        for (String value : s) printOutlined(value, length);
-        printBorder(80, length);*/
+        for (String value : s) printOutlined(value, 80, length);
+        printBorder(80, length);
     }
 
     private static void changeSettings() {
@@ -374,7 +398,7 @@ public class GameCtrl {
                         displaySettings();
                         break;
                 }
-            } while (!inputString.equals("q"));
+            } while (!inputString.equals("q") && !inputString.equals("Q"));
         } catch (NumberFormatException e) {
             System.out.println("Erreur lors de l'entrée des données pour les paramètres.");
             System.out.println("Le jeu va continuer avec les paramètre actuels : ");

@@ -13,23 +13,25 @@ public class Bonus {
     }
 
     public static Bonus LifeBonus() {
-		return new Bonus(1.3, 1, 1, 7);
+        return new Bonus(1.3, 1, 1, 7);
     }
 
     public static Bonus StrengthBonus() {
-		return new Bonus(1, 1.3, 1, 7);
+        return new Bonus(1, 1.3, 1, 7);
     }
 
     public static Bonus SpeedBonus() {
-		return new Bonus(1, 1, 3, 7);
+        return new Bonus(1, 1, 3, 7);
     }
 
-    public static String bonusInfos(){
-    	String infos = "(VIE) Bonus de vie : augmente PV de 30%\n";
-    	infos += "(FORCE) Bonus de force : augmente PA de 30%\n";
-    	infos += "(SPEED) Bonus de force : augmente PA de 30%\n";
-    	return infos;
-	}
+    public static String bonusInfos() {
+        String infos = "(VIE) Bonus de vie : augmente PV de 30%\n" +
+                "(FORCE) Bonus de force : augmente PA de 30%\n" +
+                "(SPEED) Bonus de vitesse : augmente vitesse de 300%\n" +
+                "Chaque bonus coûte 7$";
+
+        return infos;
+    }
 
     public double getPvFactor() {
         return pvFactor;
